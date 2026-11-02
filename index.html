@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAROTICA // Between the Cards</title>
+    <style>
+        :root {
+            --bg-void: #02050e;
+            --bg-obsidian: rgba(6, 11, 24, 0.92);
+            --bg-card: rgba(10, 17, 36, 0.92);
+            --neon-cyan: #00f0ff;
+            --neon-pink: #ff007f;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cinzel', 'Times New Roman', serif, monospace;
+        }
+
+        body {
+            background-image: url('assets/00_background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        /* Interactive Click Particle Burst */
+        .click-spark {
+            position: fixed;
+            pointer-events: none;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: burstOut 0.8s ease-out forwards;
+            z-index: 9999;
+        }
+
+        @keyframes burstOut {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+        }
+
+        /* Responsive Seamless Header */
+        header {
+            width: 100%;
+            padding: 15px 15px 5px 15px;
+            text-align: center;
+            background: transparent;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-logo {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 0 15px #ff007f) drop-shadow(0 0 35px #ff007f);
+        }
+
+        .subtitle {
+            font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+            color: var(--neon-cyan);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.9);
+            margin-top: -28px;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 12;
+        }
+
+        .audio-status {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            background: rgba(10, 17, 36, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 3px 12px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        main {
+            width: 100%;
+            max-width: 1200px;
+            padding: 10px 20px 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            z-index: 5;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Top Bar Controls */
+        .external-controls {
+            width: 100%;
+            max-width: 820px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .reverse-toggle-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-obsidian);
+            border: 1px solid rgba(255, 0, 127, 0.5);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 12px rgba(255, 0, 127, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .reverse-toggle-box.active-rev {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 18px rgba(255, 0, 127, 0.5);
+        }
+
+        .reverse-toggle-box input[type="checkbox"] {
+            accent-color: var(--neon-pink);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .reverse-toggle-box label {
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            cursor: pointer;
+        }
+
+        .reverse-toggle-box.active-rev label {
+            color: #ffb3c1;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(255, 0, 127, 0.6);
+        }
+
+        /* Tech-Noir Angled Box Shape with Responsive Scaling */
+        @keyframes neonBreath {
+            0%, 100% {
+                border-color: rgba(0, 240, 255, 0.5);
+                box-shadow: 0 0 20px rgba(0, 240, 255, 0.25), inset 0 0 15px rgba(0, 240, 255, 0.05);
+            }
+            50% {
+                border-color: rgba(0, 240, 255, 0.9);
+                box-shadow: 0 0 40px rgba(0, 240, 255, 0.5), inset 0 0 25px rgba(0, 240, 255, 0.15);
+            }
+        }
+
+        .sanctum-gate {
+            text-align: center;
+            padding: 30px 24px;
+            background: var(--bg-obsidian);
+            backdrop-filter: blur(12px);
+            width: 100%;
+            max-width: 820px;
+            border: 2px solid var(--neon-cyan);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.25);
+            animation: neonBreath 5s infinite ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sanctum-gate p {
+            color: var(--text-main);
+            font-size: clamp(1rem, 1.5vw, 1.15rem);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        /* Fully Responsive & Centered Emblem Container */
+        .front-emblem-container {
+            width: clamp(140px, 18vw, 190px);
+            height: clamp(140px, 18vw, 190px);
+            border-radius: 50%;
+            border: 3px solid var(--neon-pink);
+            background: rgba(3, 6, 15, 0.6);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 0 35px rgba(255, 0, 127, 0.6), inset 0 0 20px rgba(255, 0, 127, 0.4);
+            animation: pulseEmblem 3s infinite ease-in-out;
+            overflow: hidden;
+            padding: 8px;
+        }
+
+        @keyframes pulseEmblem {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 35px rgba(255, 0, 127, 0.6); }
+            50% { transform: scale(1.03); box-shadow: 0 0 50px rgba(255, 0, 127, 0.9); }
+        }
+
+        .front-emblem-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+
+        /* Tech-Noir Angled Option Buttons */
+        .morality-container {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 650px;
+            margin-bottom: 22px;
+        }
+
+        .morality-btn {
+            flex: 1;
+            background: var(--bg-card);
+            border: 2px solid rgba(0, 240, 255, 0.4);
+            padding: 14px;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .morality-btn span {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            text-transform: none;
+            opacity: 0.9;
+        }
+
+        .morality-btn.selected-virtue {
+            border-color: var(--neon-cyan);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            background: rgba(0, 240, 255, 0.12);
+        }
+
+        .morality-btn.selected-virtue span { color: var(--neon-cyan); }
+
+        .morality-btn.selected-vice {
+            border-color: var(--neon-pink);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.5);
+            background: rgba(255, 0, 127, 0.12);
+        }
+
+        .morality-btn.selected-vice span { color: #ffb3c1; }
+
+        /* Question Input Styling */
+        .question-input-box {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bg-card);
+            border: 2px solid var(--neon-cyan);
+            padding: 15px;
+            font-size: 1.1rem;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 22px;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+            outline: none;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 12px rgba(0, 240, 255, 0.3);
+        }
+
+        .question-input-box::placeholder {
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        .guild-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            width: 100%;
+            margin-bottom: 22px;
+        }
+
+        @media(max-width: 800px) {
+            .guild-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .guild-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            padding: 18px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .guild-card:hover, .guild-card.selected {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+            transform: translateY(-2px);
+            background: rgba(0, 240, 255, 0.12);
+        }
+
+        .guild-card h3 {
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .guild-card p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            line-height: 1.3;
+            margin-bottom: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sanctuary Guide */
+        .sanctum-intro-footnote {
+            width: 100%;
+            max-width: 740px;
+            background: var(--bg-card);
+            border: 2px solid rgba(0, 240, 255, 0.5);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+            padding: 20px 24px;
+            margin-top: 20px;
+            text-align: left;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+        }
+
+        .sanctum-intro-footnote h4 {
+            color: var(--neon-cyan);
+            font-size: 0.95rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+        }
+
+        .sanctum-intro-footnote p {
+            font-size: 0.9rem;
+            color: #f8fafc;
+            line-height: 1.5;
+            margin-bottom: 6px;
+            text-transform: none;
+        }
+
+        /* Dialogue Box */
+        .quest-master-box {
+            width: 100%;
+            max-width: 1050px;
+            background: var(--bg-obsidian);
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--neon-cyan);
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+            position: relative;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+            text-align: center;
+        }
+
+        .quest-master-box::before {
+            content: "TAROTICA SANCTUARY";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-void);
+            color: var(--neon-cyan);
+            padding: 0 12px;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .dialogue-text {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: #fff;
+            font-style: italic;
+        }
+
+        /* Neon Action Buttons */
+        .alchemical-btn {
+            background: var(--bg-card);
+            color: var(--neon-cyan);
+            border: 2px solid var(--neon-cyan);
+            padding: 12px 26px;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+        }
+
+        .alchemical-btn:hover {
+            background: var(--neon-cyan);
+            color: var(--bg-void);
+            box-shadow: 0 0 35px var(--neon-cyan);
+            transform: scale(1.02);
+        }
+
+        .alchemical-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: #444;
+            color: #666;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Spread Container */
+        .reading-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cards-spread-area {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 1050px;
+            margin: 10px 0 20px 0;
+            perspective: 1000px;
+        }
+
+        @media(max-width: 900px) {
+            .cards-spread-area {
+                grid-template-columns: 1fr;
+                max-width: 360px;
+            }
+        }
+
+        .card-slot-wrapper {
+            width: 100%;
+            height: 560px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .tarot-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .tarot-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-slot-wrapper:hover .card-back {
+            border-color: #fff;
+            box-shadow: 0 0 30px var(--neon-cyan);
+        }
+
+        /* Card Faces */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border: 2px solid var(--neon-cyan);
+            background: rgba(8, 14, 26, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.9);
+            border-radius: 6px;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card-face.reversed-border {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.45);
+        }
+
+        .card-back {
+            background: var(--bg-card);
+            padding: 8px;
+            border: 2px solid var(--neon-cyan);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-back-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .card-front {
+            transform: rotateY(180deg);
+            background: rgba(8, 14, 26, 0.95);
+            padding: 0;
+            border: 2px solid var(--neon-cyan);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 48%;
+            object-fit: contain;
+            display: block;
+            background: var(--bg-void);
+            padding: 6px;
+            border-bottom: 2px solid rgba(0, 240, 255, 0.4);
+        }
+
+        .card-image.is-reversed {
+            transform: rotate(180deg);
+        }
+
+        .card-overlay-info {
+            width: 100%;
+            height: 52%;
+            background: rgba(8, 14, 26, 0.95);
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 6px;
+            text-align: left;
+            overflow-y: auto;
+        }
+
+        .slot-title-tag {
+            font-size: 0.7rem;
+            color: var(--neon-cyan);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .slot-title-tag.rev-tag {
+            color: var(--neon-pink);
+        }
+
+        .card-name-title {
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .card-meaning-text {
+            font-size: 1.15rem;
+            color: #f8fafc;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* Verdict Box */
+        .quest-verdict {
+            width: 100%;
+            max-width: 1050px;
+            background: var(--bg-obsidian);
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--neon-cyan);
+            padding: 22px;
+            margin-top: 12px;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.25);
+            animation: fadeIn 0.5s ease forwards;
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+            text-align: center;
+        }
+
+        .quest-verdict h3 {
+            color: var(--neon-cyan);
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .quest-verdict p {
+            font-size: 1.05rem;
+            line-height: 1.55;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .choice-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* 4th Card Popup Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 5, 14, 0.94);
+            backdrop-filter: blur(12px);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .modal-card-box {
+            width: 100%;
+            max-width: 440px;
+            height: 640px;
+            position: relative;
+            animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes scaleUp {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="assets/header_01.png" alt="TAROTICA" class="header-logo" onerror="this.style.display='none';">
+        <div class="subtitle">between the cards</div>
+        <div class="audio-status" id="audio-mood-indicator">Atmosphere: Ready (Choose Your Path)</div>
+    </header>
+
+    <main>
+        <!-- PHASE 1: STANCE & CONTROLS -->
+        <section id="screen-stance" class="screen active">
+            
+            <div class="external-controls">
+                <button class="alchemical-btn" style="padding: 8px 16px; font-size: 0.75rem;" onclick="resetSanctum(); createSpark(event);">[ NEW READING ]</button>
+                <div class="reverse-toggle-box active-rev" id="rev-toggle-box" onclick="toggleReversals(); createSpark(event);">
+                    <input type="checkbox" id="rev-checkbox" checked>
+                    <label for="rev-checkbox">Enable Variant Cards (~30%)</label>
+                </div>
+            </div>
+
+            <div class="sanctum-gate">
+                <!-- Perfectly Circular Scaled Emblem Seal -->
+                <div class="front-emblem-container">
+                    <img src="assets/00_emblem.jpeg" alt="Tarotica Emblem" onerror="this.style.display='none';">
+                </div>
+
+                <p style="font-weight: bold; margin-bottom: 14px;">No guilt here. Everyone is safe. Choose how you wish to be held tonight:</p>
+                
+                <div class="morality-container">
+                    <button class="morality-btn selected-virtue" id="btn-virtue" onclick="setMorality('comfort'); createSpark(event);">
+                        Gentle Healing
+                        <span>Sweet Water Chime</span>
+                    </button>
+                    <button class="morality-btn" id="btn-vice" onclick="setMorality('desire'); createSpark(event);">
+                        Raw Longing
+                        <span>Velvety Chord & Sigh</span>
+                    </button>
+                </div>
+
+                <p style="margin-bottom: 16px;">How do you approach your own heart? Choose your stance:</p>
+                
+                <div class="guild-grid">
+                    <div class="guild-card" onclick="selectGuild('The Seeker', this); createSpark(event);">
+                        <h3>The Seeker</h3>
+                        <p>Open to Truth</p>
+                    </div>
+                    <div class="guild-card" onclick="selectGuild('The Protector', this); createSpark(event);">
+                        <h3>The Protector</h3>
+                        <p>Guarding Peace</p>
+                    </div>
+                    <div class="guild-card" onclick="selectGuild('The Wanderer', this); createSpark(event);">
+                        <h3>The Wanderer</h3>
+                        <p>Seeking Balance</p>
+                    </div>
+                </div>
+
+                <button class="alchemical-btn" id="stance-btn" disabled onclick="proceedToQuestion(); createSpark(event);">[ CONTINUE TO WHISPER ]</button>
+
+                <!-- Sanctuary Guide -->
+                <div class="sanctum-intro-footnote">
+                    <h4>Sanctuary Guide</h4>
+                    <p>&bull; <strong>Gentle Healing:</strong> Soothes the spirit with tranquil water chimes and comforting insights.</p>
+                    <p>&bull; <strong>Raw Longing:</strong> Awakens midnight passion with velvety chords and intimate resonance.</p>
+                    <p>&bull; <strong>Variant Cards:</strong> Adds an occasional inverted perspective (~30% chance) for deeper psychological nuance.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PHASE 2: QUESTION -->
+        <section id="screen-question" class="screen">
+            <div class="external-controls">
+                <button class="alchemical-btn" style="padding: 8px 16px; font-size: 0.75rem;" onclick="resetSanctum(); createSpark(event);">[ NEW READING ]</button>
+            </div>
+            <div class="sanctum-gate">
+                <p style="font-weight: bold; margin-bottom: 18px;">Lay down what you've been carrying in secret:</p>
+                <input type="text" id="user-question" class="question-input-box" placeholder="e.g., Why do I crave someone who feels so dangerous to love?">
+
+                <button class="alchemical-btn" style="background: var(--neon-cyan); color: var(--bg-void);" onclick="enterSanctum(); createSpark(event);">[ UNLOCK THE ORACLE ]</button>
+            </div>
+        </section>
+
+        <!-- PHASE 3: THE 3-CARD SPREAD -->
+        <section id="screen-reading" class="screen">
+            <div class="external-controls">
+                <button class="alchemical-btn" style="padding: 8px 16px; font-size: 0.75rem;" onclick="resetSanctum(); createSpark(event);">[ NEW READING ]</button>
+            </div>
+            <div class="quest-master-box">
+                <div id="reading-dialogue" class="dialogue-text">
+                    "Three cards rest before you. Touch each seal to feel completely understood:<br>
+                    <span style="color: var(--neon-cyan); font-size: 0.9rem; letter-spacing: 1px;">1. The Hidden Wound &rarr; 2. The Quiet Craving &rarr; 3. The Soft Release</span>"
+                </div>
+            </div>
+
+            <div class="reading-container">
+                <div class="cards-spread-area">
+                    <!-- Card 1: Past -->
+                    <div class="card-slot-wrapper" onclick="revealCard(0); createSpark(event);">
+                        <div class="tarot-card" id="card-0">
+                            <div class="card-face card-back">
+                                <img src="assets/card_back.png" alt="Card Cover" class="card-back-image" onerror="this.style.display='none';">
+                            </div>
+                            <div class="card-face card-front" id="front-0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Present -->
+                    <div class="card-slot-wrapper" onclick="revealCard(1); createSpark(event);">
+                        <div class="tarot-card" id="card-1">
+                            <div class="card-face card-back">
+                                <img src="assets/card_back.png" alt="Card Cover" class="card-back-image" onerror="this.style.display='none';">
+                            </div>
+                            <div class="card-face card-front" id="front-1"></div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Future -->
+                    <div class="card-slot-wrapper" onclick="revealCard(2); createSpark(event);">
+                        <div class="tarot-card" id="card-2">
+                            <div class="card-face card-back">
+                                <img src="assets/card_back.png" alt="Card Cover" class="card-back-image" onerror="this.style.display='none';">
+                            </div>
+                            <div class="card-face card-front" id="front-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PHASE 4: TWO OPTIONS -->
+                <div id="verdict-box" class="quest-verdict hidden">
+                    <h3>You Are Seen and Safe Here</h3>
+                    <p>Your heart has spoken without fear of judgment. How shall we seal this moment?</p>
+                    <div class="choice-buttons" id="verdict-buttons-container">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 4th Guiding Card Popup Modal -->
+    <div id="fourth-card-modal" class="modal-overlay hidden">
+        <div class="modal-card-box">
+            <div class="tarot-card flipped" style="width:100%; height:100%;">
+                <div class="card-face card-front" id="modal-card-front" style="position:relative; width:100%; height:100%;">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 18px;">
+                <button class="alchemical-btn" style="background: var(--neon-cyan); color: var(--bg-void);" onclick="resetSanctum(); createSpark(event);">[ SHARE ANOTHER WHISPER ]</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- TOUCH INTERACTION: PARTICLE BURSTS --- */
+        function createSpark(event) {
+            const x = event.clientX || (event.touches ? event.touches[0].clientX : window.innerWidth / 2);
+            const y = event.clientY || (event.touches ? event.touches[0].clientY : window.innerHeight / 2);
+
+            const sparkCount = 12;
+            const color = selectedMorality === 'comfort' ? '#00f0ff' : '#ff007f';
+
+            for (let i = 0; i < sparkCount; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'click-spark';
+                spark.style.left = `${x}px`;
+                spark.style.top = `${y}px`;
+                spark.style.backgroundColor = color;
+                spark.style.boxShadow = `0 0 8px ${color}`;
+
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 40 + Math.random() * 70;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+
+                spark.style.setProperty('--dx', `${dx}px`);
+                spark.style.setProperty('--dy', `${dy}px`);
+
+                document.body.appendChild(spark);
+                setTimeout(() => spark.remove(), 800);
+            }
+        }
+
+
+        /* --- AUDIO & VARIANT STATE --- */
+        let audioCtx = null;
+        let allowReversals = true;
+
+        function toggleReversals() {
+            allowReversals = !allowReversals;
+            const checkbox = document.getElementById('rev-checkbox');
+            const box = document.getElementById('rev-toggle-box');
+            checkbox.checked = allowReversals;
+            if (allowReversals) {
+                box.classList.add('active-rev');
+            } else {
+                box.classList.remove('active-rev');
+            }
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSweetWaterChime() {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(528, audioCtx.currentTime); 
+                osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.6);
+
+                gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.7);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.7);
+            } catch(e){}
+        }
+
+        function playSensuousVelvetChord() {
+            try {
+                initAudio();
+                [146.83, 220].forEach(freq => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 0.95, audioCtx.currentTime + 0.8);
+
+                    gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.1, audioCtx.currentTime + 0.2);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.9);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.9);
+                });
+            } catch(e){}
+        }
+
+        function playStanceSound() {
+            if (selectedMorality === 'comfort') {
+                playSweetWaterChime();
+                document.getElementById('audio-mood-indicator').innerText = "Atmosphere: Gentle Healing (Sweet Water Chime Active)";
+            } else {
+                playSensuousVelvetChord();
+                document.getElementById('audio-mood-indicator').innerText = "Atmosphere: Raw Longing (Velvety Chord Active)";
+            }
+        }
+
+        function playCardFlipSound() {
+            if (selectedMorality === 'comfort') {
+                playSweetWaterChime();
+            } else {
+                playSensuousVelvetChord();
+            }
+        }
+
+        function playVerdictSound() {
+            if (selectedMorality === 'comfort') {
+                playSweetWaterChime();
+            } else {
+                playSensuousVelvetChord();
+            }
+        }
+
+
+        /* --- TAROT DATABASE WITH VARIANTS --- */
+        let selectedMorality = "comfort";
+        let selectedGuild = "";
+        let userQuestion = "";
+        let drawnCards = [];
+        let revealedCount = 0;
+        let fourthCardData = null;
+        let userChoice = "";
+
+        const deckDatabase = [
+            { 
+                name: "The Fool", path: "assets/major 22/00_the_fool.png",
+                comfortPast: "You had to walk away from someone who felt like home, because staying meant slowly losing yourself. It took courage to step into the unknown.",
+                comfortRevPast: "Variant: You stayed too long in a draining situation because fear of change kept you stuck.",
+                comfortPresent: "You are standing right on the edge between what you left behind and a peaceful new beginning. Take a deep breath.",
+                comfortRevPresent: "Variant: You are doubting yourself and feeling scared to take that next step forward.",
+                comfortFuture: "A gentle wave of peace is coming your way, reminding you that it is safe to start over and be happy.",
+                comfortRevFuture: "Variant: Slow down. Don't rush into new connections until your heart feels fully ready and safe.",
+                desirePast: "You gave your heart to a stranger in the night, chasing pure physical friction just to feel alive.",
+                desireRevPast: "Variant: You held back your desires out of pride, acting cold while burning up inside.",
+                desirePresent: "A heavy, sweet hunger for touch fills your quiet moments. You crave closeness and warm skin.",
+                desireRevPresent: "Variant: You are overthinking every glance, making simple attraction feel complicated.",
+                desireFuture: "Breathless passion in a quiet room where no one can reach you. Someone is going to hold you close and show you what they want.",
+                desireRevFuture: "Variant: The passion is building up slowly, making the eventual release all the more intense."
+            },
+            { 
+                name: "The Magician", path: "assets/major 22/01_the_magician.png",
+                comfortPast: "You mastered the art of hiding your pain behind a strong smile, acting tough so others wouldn't worry.",
+                comfortRevPast: "Variant: You poured all your energy into keeping up appearances until you completely burned out.",
+                comfortPresent: "You hold a quiet, steady strength right now. Even in private, your presence is deeply felt.",
+                comfortRevPresent: "Variant: You feel like you are faking your strength. It's okay to drop your armor and rest.",
+                comfortFuture: "You are stepping into your power, no longer tolerating half-hearted affection or drama.",
+                comfortRevFuture: "Variant: Setting boundaries feels awkward right now, but sticking to your worth is essential.",
+                desirePast: "You played with desire like a game, enjoying the power of knowing someone was drawn to you.",
+                desireRevPast: "Variant: Playing games with your heart backfired, leaving you restless and unsettled.",
+                desirePresent: "Magnetic tension hums beneath your skin. You know exactly who you want and what you want to happen.",
+                desireRevPresent: "Variant: You are second-guessing yourself when you should just trust your natural attraction.",
+                desireFuture: "A moment of pure surrender where whispered words melt away resistance and lead to deep intimacy.",
+                desireRevFuture: "Variant: Letting go of control will bring you the exact closeness you've been craving."
+            },
+            { 
+                name: "The High Priestess", path: "assets/major 22/02_the_high_priestess.png",
+                comfortPast: "You spent silent nights craving someone who could understand your soul without you needing to explain.",
+                comfortRevPast: "Variant: You ignored your gut feeling because you wanted love so badly, leading to hurt.",
+                comfortPresent: "Your intuition is speaking loudly right now. Someone is thinking about you and wishing they were near.",
+                comfortRevPresent: "Variant: Your mind is cloudy with doubts. Trust your inner voice instead of outside opinions.",
+                comfortFuture: "A sacred, beautiful intimacy is unfolding where you will finally feel fully known and deeply cherished.",
+                comfortRevFuture: "Variant: You are keeping your walls up too high. Let someone in to give you the comfort you need.",
+                desirePast: "Keeping your deepest fantasies locked away while watching from the shadows, craving intense touch.",
+                desireRevPast: "Variant: Repressed desires are making you restless and creating secret frustrations.",
+                desirePresent: "Electric tension hangs thick between you and your obsession. You both know something is about to happen.",
+                desireRevPresent: "Variant: You are misreading signals; give things a little more time to unfold naturally.",
+                desireFuture: "Unveiling secrets in the dark that make your pulse race as whispered confessions blur the lines.",
+                desireRevFuture: "Variant: Hidden feelings are about to come out into the open very soon."
+            },
+            { 
+                name: "The Empress", path: "assets/major 22/03_the_empress.png",
+                comfortPast: "You poured your warmth into people who took your light for granted, leaving you feeling drained.",
+                comfortRevPast: "Variant: You gave so much to others that you forgot to take care of your own heart.",
+                comfortPresent: "You radiate a natural, quiet warmth tonight. You are done chasing validation and simply enjoying your peace.",
+                comfortRevPresent: "Variant: Self-doubt is trying to tell you lies about your worth. You are wonderful just as you are.",
+                comfortFuture: "A wonderful time of comfort, soft lighting, and being adored by someone who treats you like art.",
+                comfortRevFuture: "Variant: Allow yourself to receive care and affection without feeling like you have to earn it.",
+                desirePast: "Using your natural charm to let others admire you while keeping your own heart guarded.",
+                desireRevPast: "Variant: You felt appreciated only for what you give, rather than being cherished for yourself.",
+                desirePresent: "A powerful craving for physical warmth, comfort, and being held close without any rushing.",
+                desireRevPresent: "Variant: You want closeness badly, but old fears are making you hesitate.",
+                desireFuture: "A lavish, beautiful night of physical indulgence where every touch feels like pure treasure.",
+                desireRevFuture: "Variant: Take your time savoring the sweetness; there is no need to rush the experience."
+            },
+            { 
+                name: "The Emperor", path: "assets/major 22/04_the_emperor.png",
+                comfortPast: "You built an emotional fortress out of steel because softness felt unsafe after past hurts.",
+                comfortRevPast: "Variant: Trying to control every little detail of a relationship ended up pushing someone away.",
+                comfortPresent: "You handle everything with precision, but tonight your soul is quietly craving the luxury of letting go.",
+                comfortRevPresent: "Variant: You are holding your boundaries too tightly. It's safe to soften up tonight.",
+                comfortFuture: "You will meet someone warm and strong enough to help you drop your armor completely.",
+                comfortRevFuture: "Variant: Stubborn pride is keeping you from experiencing a sweet moment of release.",
+                desirePast: "Trying to keep your wild desires locked away with strict self-control and discipline.",
+                desireRevPast: "Variant: Your suppressed passions finally broke through your careful discipline.",
+                desirePresent: "A warm, protective desire to take charge of the moment and feel completely desired.",
+                desireRevPresent: "Variant: Jealousy or overthinking is getting in the way of having a good time.",
+                desireFuture: "Surrendering your usual control to someone whose warmth matches yours. Let yourself melt.",
+                desireRevFuture: "Variant: You will resist the chemistry at first, but surrender will feel amazing."
+            },
+            { 
+                name: "Wheel of Fortune", path: "assets/major 22/10_wheel_of_fortune.png",
+                comfortPast: "You survived an unexpected twist of fate that completely rearranged your world for the better.",
+                comfortRevPast: "Variant: You felt stuck in a repetitive loop of bad timing and old emotional patterns.",
+                comfortPresent: "The cosmic energy is shifting in your favor tonight. Pay attention to sudden, happy coincidences.",
+                comfortRevPresent: "Variant: Everything feels a bit unpredictable right now. Just breathe and go with the flow.",
+                comfortFuture: "A breathtaking collision of timing and chemistry will bring you a wonderful surprise.",
+                comfortRevFuture: "Variant: Good things are coming, but they are taking a little longer than expected. Have patience.",
+                desirePast: "Taking a thrilling gamble on someone exciting, diving right into the spark without looking back.",
+                desireRevPast: "Variant: You took a chance on someone who didn't match your emotional investment.",
+                desirePresent: "A dizzying rush of excitement and desire for a connection that breaks the usual routine.",
+                desireRevPresent: "Variant: Impulsive feelings are making you crave attention from unexpected places.",
+                desireFuture: "A magical midnight moment of pure, unadulterated happiness and physical closeness.",
+                desireRevFuture: "Variant: A fleeting encounter that leaves you wanting something deeper and more meaningful."
+            },
+            { 
+                name: "Death", path: "assets/major 22/13_the_death.png",
+                comfortPast: "You had the courage to bury a chapter of your life that was making you unhappy. Letting go freed you.",
+                comfortRevPast: "Variant: Holding on tightly to an old memory or past connection because letting go is scary.",
+                comfortPresent: "You are shedding your old stress, feeling lighter, softer, and ready to feel genuinely alive again.",
+                comfortRevPresent: "Variant: You are resisting a change that you secretly know is good and necessary for your peace.",
+                comfortFuture: "A stunning fresh start where you no longer hide your true feelings or your need for real intimacy.",
+                comfortRevFuture: "Variant: A painful realization that is helping you grow into much better emotional health.",
+                desirePast: "Walking away from shallow connections to make room for something genuinely passionate.",
+                desireRevPast: "Variant: Struggling to break free from a chemical pull toward someone who isn't right for you.",
+                desirePresent: "A deep urge to drop your safe routines and experience intimacy that truly moves your soul.",
+                desireRevPresent: "Variant: Fear of your own intense feelings is making you pull away right when it gets good.",
+                desireFuture: "A midnight awakening where you wake up tangled in sheets with someone who loves your true self.",
+                desireRevFuture: "Variant: A long-awaited release of built-up passion and emotional warmth."
+            },
+            { 
+                name: "Ace of Cups", path: "assets/minor 56/cups/01_of_cups.png",
+                comfortPast: "You loved with absolute purity, pouring your soul into someone who couldn't quite hold something so precious.",
+                comfortRevPast: "Variant: Past disappointments built a wall around your heart to protect you from getting hurt.",
+                comfortPresent: "Your heart is tender tonight, quietly yearning for gentle intimacy, a soft touch, and true understanding.",
+                comfortRevPresent: "Variant: You are craving affection deeply, but feeling shy or worried about being vulnerable.",
+                comfortFuture: "A sweet, healing romance is stepping into your life like morning sunlight, washing away loneliness.",
+                comfortRevFuture: "Variant: Healing takes time. Be gentle with yourself and don't rush your heart's opening.",
+                desirePast: "Drowning in a late-night longing for a specific touch, reliving sweet memories until you feel warm.",
+                desireRevPast: "Variant: A quiet ache of unrequited longing that left you feeling a bit lonely.",
+                desirePresent: "An intense, beautiful vibration of body and soul, craving to be held and completely cherished.",
+                desireRevPresent: "Variant: You are aching for physical closeness that feels just out of reach tonight.",
+                desireFuture: "An overwhelming wave of comfort and physical closeness leaving you completely at peace.",
+                desireRevFuture: "Variant: A slow-building connection that will bloom into something wonderful."
+            },
+            { 
+                name: "Ace of Swords", path: "assets/minor 56/swords/01_of_swords.png",
+                comfortPast: "You found the courage to speak an honest truth that cleared away a confusing and heavy situation.",
+                comfortRevPast: "Variant: Misunderstandings or harsh words left lingering hurt that needs a gentle apology.",
+                comfortPresent: "Clear mental peace has replaced your worries. You know exactly what you want and deserve.",
+                comfortRevPresent: "Variant: You are overthinking everything in your head. Try to relax and quiet your thoughts.",
+                comfortFuture: "An honest, beautiful confession is coming—words spoken from the heart that change everything.",
+                comfortRevFuture: "Variant: Unspoken thoughts are lingering in the air. Clear communication will fix it.",
+                desirePast: "Using clever words to draw someone in and make them completely fascinated by you.",
+                desireRevPast: "Variant: Playful teasing crossed the line into a minor misunderstanding.",
+                desirePresent: "A craving for direct, confident passion with no games—just honest eye contact and closeness.",
+                desireRevPresent: "Variant: Mixed signals are creating delicious tension between you and your desire.",
+                desireFuture: "A thrilling moment where words stop mattering and touch takes over completely.",
+                desireRevFuture: "Variant: Anticipation is building up to a wonderful moment of connection."
+            },
+            { 
+                name: "Ace of Wands", path: "assets/minor 56/wands/01_of_wands.png",
+                comfortPast: "A sudden spark of inspiration reminded you how wonderfully vibrant your spirit still is.",
+                comfortRevPast: "Variant: A little false start; something you hoped would take off needs a bit more time.",
+                comfortPresent: "A warm, restless energy hums beneath your skin. Your heart is ready for excitement and joy.",
+                comfortRevPresent: "Variant: You are feeling a bit tired tonight. Give yourself permission to rest and recharge.",
+                comfortFuture: "A blazing fire of joyful chemistry is about to brighten your days and warm your nights.",
+                comfortRevFuture: "Variant: Things are warming up slowly, so enjoy the cozy buildup of anticipation.",
+                desirePast: "Chasing a reckless, exciting spark in the dark that made a single night unforgettable.",
+                desireRevPast: "Variant: A fleeting moment that left you wanting a bit more substance.",
+                desirePresent: "An urgent, wonderful hunger for closeness that makes every minute feel electric.",
+                desireRevPresent: "Variant: Waiting for the right moment is making the anticipation feel delicious.",
+                desireFuture: "An absolute explosion of warmth and passion that leaves you smiling and completely satisfied.",
+                desireRevFuture: "Variant: The slow burn of anticipation will make the final embrace truly magical."
+            },
+            { 
+                name: "Ace of Pentacles", path: "assets/minor 56/pentacles/01_of_pentacles.png",
+                comfortPast: "You quietly built a safe, cozy sanctuary around your heart where no one could disturb your peace.",
+                comfortRevPast: "Variant: Worrying too much about practical things made it hard to let your guard down.",
+                comfortPresent: "You crave grounding, real comfort tonight—the warm weight of an embrace and absolute safety.",
+                comfortRevPresent: "Variant: You feel a bit restless in your body and are looking for a way to truly unwind.",
+                comfortFuture: "A luxurious, deeply tactile partnership is taking root, filled with comfort and gentle affection.",
+                comfortRevFuture: "Variant: Take your time slowing down; you don't need to rush to find your grounding.",
+                desirePast: "Trading empty chatter for the rich luxury of being held and adored in private.",
+                desireRevPast: "Variant: Wanting to feel truly valued and treasured instead of treated like an option.",
+                desirePresent: "A deep appreciation for soft blankets, warm skin, and the slow art of being touched with care.",
+                desireRevPresent: "Variant: Craving tangible affection while feeling a bit disconnected from your senses.",
+                desireFuture: "A decadent, cozy night of pure physical indulgence where every desire is gently catered to.",
+                desireRevFuture: "Variant: Savoring every single second of comfort without any rush or pressure."
+            }
+        ];
+
+        function setMorality(mode) {
+            selectedMorality = mode;
+            const btnVirtue = document.getElementById('btn-virtue');
+            const btnVice = document.getElementById('btn-vice');
+            if(mode === 'comfort') {
+                btnVirtue.className = "morality-btn selected-virtue";
+                btnVice.className = "morality-btn";
+            } else {
+                btnVirtue.className = "morality-btn";
+                btnVice.className = "morality-btn selected-vice";
+            }
+            playStanceSound();
+        }
+
+        function selectGuild(guildName, element) {
+            selectedGuild = guildName;
+            document.querySelectorAll('.guild-card').forEach(c => c.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById('stance-btn').disabled = false;
+        }
+
+        function proceedToQuestion() {
+            goToScreen('screen-question');
+        }
+
+        function enterSanctum() {
+            userQuestion = document.getElementById('user-question').value.trim();
+            goToScreen('screen-reading');
+            initializeReading();
+        }
+
+        function goToScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function drawWeightedCard() {
+            const randomIndex = Math.floor(Math.random() * deckDatabase.length);
+            const cardObj = deckDatabase[randomIndex];
+            let isReversed = false;
+            if (allowReversals && Math.random() < 0.3) {
+                isReversed = true;
+            }
+            return {
+                ...cardObj,
+                isReversed: isReversed
+            };
+        }
+
+        function initializeReading() {
+            revealedCount = 0;
+            document.getElementById('verdict-box').classList.add('hidden');
+            document.getElementById('fourth-card-modal').classList.add('hidden');
+
+            const verdictButtonsContainer = document.getElementById('verdict-buttons-container');
+            if(selectedMorality === 'comfort') {
+                verdictButtonsContainer.innerHTML = `
+                    <button class="alchemical-btn" onclick="triggerFourthCardPopup('defy'); createSpark(event);">[ STEP INTO THE LIGHT ]</button>
+                    <button class="alchemical-btn" style="border-color: #fff; color: #fff;" onclick="triggerFourthCardPopup('agree'); createSpark(event);">[ REST IN THE WARMTH ]</button>
+                `;
+            } else {
+                verdictButtonsContainer.innerHTML = `
+                    <button class="alchemical-btn" onclick="triggerFourthCardPopup('defy'); createSpark(event);">[ WALK THE EDGE OF DESIRE ]</button>
+                    <button class="alchemical-btn" style="border-color: var(--neon-pink); color: var(--neon-pink);" onclick="triggerFourthCardPopup('agree'); createSpark(event);">[ DIVE HEADFIRST INTO IMMORALITY ]</button>
+                `;
+            }
+
+            drawnCards = [];
+            while (drawnCards.length < 4) {
+                let candidate = drawWeightedCard();
+                if (!drawnCards.some(c => c.name === candidate.name)) {
+                    drawnCards.push(candidate);
+                }
+            }
+            fourthCardData = drawnCards[3];
+
+            for(let i=0; i<3; i++) {
+                const cardEl = document.getElementById(`card-${i}`);
+                cardEl.classList.remove('flipped');
+            }
+        }
+
+        function revealCard(index) {
+            const cardEl = document.getElementById(`card-${index}`);
+            if (cardEl.classList.contains('flipped')) return;
+
+            cardEl.classList.add('flipped');
+            revealedCount++;
+            playCardFlipSound();
+
+            const card = drawnCards[index];
+            const slotLabels = [
+                "1. The Hidden Wound", 
+                "2. The Quiet Craving", 
+                "3. The Soft Release"
+            ];
+            
+            let readingText = "";
+            if (index === 0) {
+                if (selectedMorality === 'comfort') {
+                    readingText = card.isReversed ? card.comfortRevPast : card.comfortPast;
+                } else {
+                    readingText = card.isReversed ? card.desireRevPast : card.desirePast;
+                }
+            } else if (index === 1) {
+                if (selectedMorality === 'comfort') {
+                    readingText = card.isReversed ? card.comfortRevPresent : card.comfortPresent;
+                } else {
+                    readingText = card.isReversed ? card.desireRevPresent : card.desirePresent;
+                }
+            } else if (index === 2) {
+                if (selectedMorality === 'comfort') {
+                    readingText = card.isReversed ? card.comfortRevFuture : card.comfortFuture;
+                } else {
+                    readingText = card.isReversed ? card.desireRevFuture : card.desireFuture;
+                }
+            }
+
+            const frontEl = document.getElementById(`front-${index}`);
+            frontEl.className = `card-face card-front ${card.isReversed ? 'reversed-border' : ''}`;
+            
+            const titleTagText = card.isReversed ? `${slotLabels[index]} [ VARIANT ]` : slotLabels[index];
+            const tagClass = card.isReversed ? "slot-title-tag rev-tag" : "slot-title-tag";
+            const imgClass = card.isReversed ? "card-image is-reversed" : "card-image";
+
+            frontEl.innerHTML = `
+                <img src="${card.path}" alt="${card.name}" class="${imgClass}" onerror="this.style.display='none';">
+                <div class="card-overlay-info">
+                    <div class="${tagClass}">${titleTagText}</div>
+                    <div class="card-name-title">${card.name} ${card.isReversed ? '(Variant)' : ''}</div>
+                    <div class="card-meaning-text">${readingText}</div>
+                </div>
+            `;
+
+            if (revealedCount === 3) {
+                setTimeout(showVerdict, 800);
+            }
+        }
+
+        function showVerdict() {
+            document.getElementById('verdict-box').classList.remove('hidden');
+        }
+
+        function triggerFourthCardPopup(choice) {
+            userChoice = choice;
+            playVerdictSound();
+            const modal = document.getElementById('fourth-card-modal');
+            const modalFront = document.getElementById('modal-card-front');
+            const card = fourthCardData;
+            
+            let climaxText = "";
+            if (selectedMorality === 'comfort') {
+                climaxText = card.isReversed ? card.comfortRevFuture : card.comfortFuture;
+            } else {
+                climaxText = card.isReversed ? card.desireRevFuture : card.desireFuture;
+            }
+
+            if(userQuestion) {
+                climaxText = `<em>Regarding your midnight whisper ("${userQuestion}"):</em><br><br>` + climaxText;
+            }
+
+            modalFront.className = `card-face card-front ${card.isReversed ? 'reversed-border' : ''}`;
+            modalFront.style.position = "relative";
+            modalFront.style.width = "100%";
+            modalFront.style.height = "100%";
+
+            const titleTagText = card.isReversed ? "TAROTICA Verdict [ VARIANT ]" : "TAROTICA Verdict";
+            const tagClass = card.isReversed ? "slot-title-tag rev-tag" : "slot-title-tag";
+            const imgClass = card.isReversed ? "card-image is-reversed" : "card-image";
+
+            modalFront.innerHTML = `
+                <img src="${card.path}" alt="${card.name}" class="${imgClass}" style="height: 48%;" onerror="this.style.display='none';">
+                <div class="card-overlay-info" style="height: 52%;">
+                    <div class="${tagClass}">${titleTagText}</div>
+                    <div class="card-name-title">${card.name} ${card.isReversed ? '(Variant)' : ''}</div>
+                    <div class="card-meaning-text">${climaxText}</div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function resetSanctum() {
+            document.getElementById('fourth-card-modal').classList.add('hidden');
+            document.getElementById('user-question').value = "";
+            document.querySelectorAll('.guild-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('stance-btn').disabled = true;
+            goToScreen('screen-stance');
+        }
+    </script>
+</body>
+</html>
